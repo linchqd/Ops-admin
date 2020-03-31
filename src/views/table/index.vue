@@ -1,79 +1,73 @@
 <template>
-  <div class="app-container">
-    <el-table
-      v-loading="listLoading"
-      :data="list"
-      element-loading-text="Loading"
-      border
-      fit
-      highlight-current-row
-    >
-      <el-table-column align="center" label="ID" width="95">
-        <template slot-scope="scope">
-          {{ scope.$index }}
-        </template>
-      </el-table-column>
-      <el-table-column label="Title">
-        <template slot-scope="scope">
-          {{ scope.row.title }}
-        </template>
-      </el-table-column>
-      <el-table-column label="Author" width="110" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.author }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Pageviews" width="110" align="center">
-        <template slot-scope="scope">
-          {{ scope.row.pageviews }}
-        </template>
-      </el-table-column>
-      <el-table-column class-name="status-col" label="Status" width="110" align="center">
-        <template slot-scope="scope">
-          <el-tag :type="scope.row.status | statusFilter">{{ scope.row.status }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" prop="created_at" label="Display_time" width="200">
-        <template slot-scope="scope">
-          <i class="el-icon-time" />
-          <span>{{ scope.row.display_time }}</span>
-        </template>
-      </el-table-column>
-    </el-table>
+  <div class="circle-progress">
+    <div :style="{height: divWidth, width: divWidth, overflow: 'hidden'}">
+      <svg :width="width" :height="width">
+        <circle :stroke="innerStrokeColor"
+          :stroke-width="strokeWidth" :r="(width / 2) - (strokeWidth * 2)" :cx="width/2" :cy="width/2" fill="none"
+        />
+        <circle ref="outer" class="circle-progress-outer-circle" :stroke="outerStrokeColor"
+          :stroke-width="strokeWidth" :r="(width / 2) - (strokeWidth * 2)" :cx="width/2" :cy="width/2" fill="none"
+          :stroke-dasharray="circumference"
+          :stroke-dashoffset="dashOffset"
+        />
+      </svg>
+    </div>
+    <div class="circle-progress-title">
+      <span class="circle-progress-text">CPU使用率</span>
+      <h3>{{this.percent * 100}}%</h3>
+    </div>
   </div>
 </template>
 
 <script>
-import { getList } from '@/api/table'
-
 export default {
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        published: 'success',
-        draft: 'gray',
-        deleted: 'danger'
-      }
-      return statusMap[status]
-    }
-  },
   data() {
     return {
-      list: null,
-      listLoading: true
+      id: 1,
+      width: 120,
+      innerStrokeColor: 'rgba(0, 0, 0, 0.1)',
+      outerStrokeColor: 'rgb(64, 158, 255, 0.8)',
+      strokeWidth: 4,
+      percent: 0.9,
+      progress: 80,
+      animationId: `circle_progress_keyframes_${this.id}`
     }
   },
-  created() {
-    this.fetchData()
-  },
-  methods: {
-    fetchData() {
-      this.listLoading = true
-      getList().then(response => {
-        this.list = response.data.items
-        this.listLoading = false
-      })
+  computed: {
+    dashOffset() {
+      return (1 - this.percent) * this.circumference
+    },
+    circumference() {
+      return (this.width / 2 - this.strokeWidth * 2) * 2 * Math.PI
+    },
+    divWidth() {
+      return this.width + 'px'
     }
+  },
+  mounted() {
+    if (document.getElementById(this.animationId)) {
+      document.getElementById(this.animationId).remove()
+    }
+    let style = document.createElement('style')
+    style.id = this.animationId
+    style.type = 'text/css'
+    style.innerHTML = `
+    @keyframes circle_progress_keyframes_name_${this.id} {
+    from {stroke-dashoffset: ${this.circumference}px;}
+    to {stroke-dashoffset: ${this.dashOffset}px;}}
+    .circle_progress_class_${this.id} {animation: circle_progress_keyframes_name_${this.id} 2s ease 200ms;}`
+    document.getElementsByTagName('head')[0].appendChild(style)
+    this.$refs.outer.classList.add(`circle_progress_class_${this.id}`)
   }
 }
 </script>
+<style lang="scss" scoped>
+.circle-progress {
+  &-outer-circle {
+    transition: 0.35s stroke-dashoffset;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+  }
+}
+</style>
+

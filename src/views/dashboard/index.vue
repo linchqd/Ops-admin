@@ -9,12 +9,23 @@
       <div class="cluster-server-pod">
         <div class="container-split">
           <div class="server">
-            <div class="layer1"><span>节点</span><span>全部节点</span></div>
-            <div class="layer2">
-              <span>总数</span><span>健康数</span><span>不健康数</span>
+            <div class="layer1">
+              <div><span>节点</span></div>
+              <div><span>全部节点</span></div>
             </div>
-            <div class="layer3">
-              <span>10</span><span>10</span><span>0</span>
+            <div class="layer2">
+              <div>
+                <div><span>总数</span></div>
+                <div><span>10</span></div>
+              </div>
+              <div>
+                <div><span>健康数</span></div>
+                <div><span>10</span></div>
+              </div>
+              <div>
+                <div><span>不健康数</span></div>
+                <div><span>0</span></div>
+              </div>
             </div>
           </div>
         </div>
@@ -129,17 +140,6 @@ export default {
             justify-content: space-between;
             height: 30px;
             line-height: 30px;
-            span {
-              min-width: 70px;
-            }
-          }
-          .layer1 {
-            margin-bottom: 20px;
-          }
-          .layer3 {
-            span {
-              font-size: 30px;
-            }
           }
         }
       }
